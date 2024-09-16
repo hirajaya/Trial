@@ -1,0 +1,73 @@
+/*payroll.css */
+
+/* Improve placeholder visibility */
+.form-control::placeholder {
+    color: #798d9e; 
+    opacity: 1; 
+
+}
+.form-group {
+    margin-bottom: 20px;
+    width: 48%;
+}
+
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+}
+
+.form-control {
+    width: 200%; /* Full width */
+    max-width: 1200px; /* Set a maximum width for larger screens */
+    background-color: #f7fafd; /* Light background color */
+    border: 1px solid #232ec0; /* Border color */
+    padding: 10px; /* Add padding for better spacing */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.form-control:focus {
+    border-color: #1b3b5e; /* Change border color on focus */
+    outline: none; /* Remove default focus outline */
+    background-color: #e9f1f8; /* Slightly darker background on focus */
+}
+
+.form-control:hover {
+    background-color: #eef4f8; /* Hover background color */
+    border-color: #0056b3; /* Hover border color */
+}
+
+@media (max-width: 767px) {
+    .d-flex {
+        flex-direction: column;
+    }
+
+    .form-control {
+        width: 100%;
+    }
+
+    .form-group {
+        width: 100%; /* Make each field full width on small screens */
+    }
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        display: flex;
+        justify-content: space-between;
+        width: 100%; /* Full width of the container */
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        width: 48%; /* Two fields per row, with some space in between */
+    }
+
+    .form-control {
+        width: 100%;
+    }
+}
+
