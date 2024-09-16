@@ -1,0 +1,61 @@
+.inquiryTable{
+    width: 60%;
+    background-color: aliceblue;
+    box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.065) ;
+    border-radius: 5px;
+    margin: 50px auto;
+    padding: 50px;
+}
+
+.addButton{
+    text-decoration: none;
+    background-color: rgb(73, 117, 118);
+    color: white;
+    font-weight: 500;
+    box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.065) ;
+    border:5px;
+    padding:10px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.inquiryTable table{
+    width:100%;
+    margin-top: 30px;
+    border-collapse: collapse;
+}
+
+.inquiryTable table thead th{
+    background-color: cadetblue;
+    color: white;
+    padding: 10px;
+}
+
+.inquiryTable table tbody td{
+    padding: 10px;
+    text-align: center;
+}
+
+.actionButtons {
+    display: flex;
+    gap: 10px; 
+    background: none;
+    border: none; 
+    padding: 0; 
+}
+
+.actionButtons button, 
+.actionButtons a {
+    display: inline-block;
+    border-left-style: hidden;
+    border: 0;
+    outline: none;
+    background-color:rgb(15, 51, 51);
+    padding: 8px 10px;
+    color: white;
+    border-radius: 15px;
+    cursor: pointer;
+    text-decoration:none;
+}
