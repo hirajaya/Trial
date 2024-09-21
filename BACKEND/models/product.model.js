@@ -4,14 +4,11 @@ const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
 
-    Mname: {
+    name: {
         type: String,
         required: true
     },
-    artistName: {
-        type: String,
-        required: true
-    },
+  
     Mprice: {
         type: Number,
         required: true

@@ -23,9 +23,9 @@ connection.once("open", () => {
 
 })
 
-const productRouter = require("./routes/products.js");
+const productRouter = require("./routes/product.route.js");
 
-app.use("/product",productRouter);
+app.use("/api",productRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is up and running on port number: ${PORT}`)

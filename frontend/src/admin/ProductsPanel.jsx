@@ -17,7 +17,7 @@ const Button = ({ onClick, children, className = "" }) => (
     </button>
 );
 
-// Custom Input Component (Updated)
+// Custom Input Component
 const Input = ({ type = "text", value, onChange, placeholder, name }) => (
     <input
         type={type}
@@ -34,8 +34,8 @@ const Modal = ({ isOpen, onClose, title, children, onSave }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0     flex justify-center items-center">
-            <div className="bg-white shadow-lg border p-20 rounded-lg w-96">
+        <div className="fixed inset-0 flex justify-center items-center">
+            <div className="bg-white shadow-lg border p-20 rounded-lg w-1/3 ">
                 <h2 className="text-xl font-bold mb-4">{title}</h2>
                 {children}
                 <div className="flex justify-end mt-4">
@@ -58,23 +58,39 @@ const ProductsPanel = () => {
     const [currentProduct, setCurrentProduct] = useState(null);
     const [formData, setFormData] = useState({
         name: "",
-        price: "",
+        Mprice: "",
         stock: "",
+        category: "",
+        imageUrl: "",
+        Mdescription: "",
     });
-
+    const baseUrl = "http://localhost:8070";
     useEffect(() => {
-        // Fetch products from your API
-        // For now, we'll use dummy data
-        setProducts([
-            { id: 1, name: "Electric Guitar", price: 799.99, stock: 10 },
-            { id: 2, name: "Acoustic Drum Set", price: 1299.99, stock: 5 },
-            { id: 3, name: "Digital Piano", price: 599.99, stock: 8 },
-        ]);
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch(`${baseUrl}/api/products`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch products");
+                }
+                const data = await response.json();
+                setProducts(data);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        };
+
+        fetchProducts();
     }, []);
 
     const handleAdd = () => {
         setCurrentProduct(null);
-        setFormData({ name: "", price: "", stock: "" });
+        setFormData({
+            name: "",
+            Mprice: "",
+            stock: "",
+            category: "",
+            imageUrl: "",
+        });
         setIsModalOpen(true);
     };
 
@@ -82,57 +98,96 @@ const ProductsPanel = () => {
         setCurrentProduct(product);
         setFormData({
             name: product.name,
-            price: product.price.toString(),
-            stock: product.stock.toString(),
+            Mprice: product.Mprice,
+            stock: product.stock,
+            category: product.category,
+            imageUrl: product.imageUrl,
+            Mdescription: product.Mdescription,
         });
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id) => {
-        setProducts(products.filter((product) => product.id !== id));
-        // In a real app, you'd also make an API call to delete the product
+    const handleDelete = async (id) => {
+        try {
+            const response = await fetch(`${baseUrl}/api/products/${id}`, {
+                method: 'DELETE',
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to delete the product');
+            }
+    
+            // Update state to remove the deleted product from the UI
+            setProducts(products.filter((product) => product._id !== id));
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
     };
+    
 
-    // Updated handleInputChange function
     const handleInputChange = (name, value) => {
         setFormData({ ...formData, [name]: value });
     };
 
     const handleSave = () => {
         const newProduct = {
-            id: currentProduct
-                ? currentProduct.id
-                : Math.max(...products.map((p) => p.id), 0) + 1,
+            id: currentProduct ? currentProduct._id : undefined, // id is undefined for new products
             name: formData.name,
-            price: parseFloat(formData.price),
+            Mprice: parseFloat(formData.Mprice),
             stock: parseInt(formData.stock),
+            category: formData.category,
+            imageUrl: formData.imageUrl,
+            Mdescription: formData.Mdescription,
         };
 
-        if (currentProduct) {
-            setProducts(
-                products.map((p) =>
-                    p.id === currentProduct.id ? newProduct : p
-                )
-            );
-        } else {
-            setProducts([...products, newProduct]);
-        }
-        setIsModalOpen(false);
+        const request = currentProduct
+            ? fetch(`${baseUrl}/api/products/${currentProduct._id}`, {
+                  method: "PUT", // Update existing product
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(newProduct),
+              })
+            : fetch(`${baseUrl}/api/products`, {
+                  method: "POST", // Add new product
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(newProduct),
+              });
+
+        request
+            .then((response) => response.json())
+            .then((data) => {
+                if (currentProduct) {
+                    setProducts(
+                        products.map((p) =>
+                            p._id === currentProduct._id ? data : p
+                        )
+                    );
+                } else {
+                    setProducts([...products, data]);
+                }
+                setIsModalOpen(false);
+            })
+            .catch((error) => console.error("Error:", error));
     };
 
     return (
-        <div className=" mx-auto p-4 bg-gray-100">
+        <div className="mx-auto p-4 bg-gray-100">
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between">
                     <div></div>
                     <div className="flex items-center">
                         <div className="flex items-center">
                             <div className="absolute p-3 flex pointer-events-none items-center left-4">
-                                <IoSearchOutline class />
+                                <IoSearchOutline />
                                 <span className="ml-2">Search..</span>
                             </div>
-                            
-                            <input className="px-10 rounded-lg py-1" type="text" />{" "}
+                            <input
+                                className="px-10 rounded-lg py-1"
+                                type="text"
+                            />
                         </div>
                         <CgProfile className="ml-4" color="gray" size={32} />
                     </div>
@@ -142,19 +197,22 @@ const ProductsPanel = () => {
                     <div className="flex items-center ">
                         <div className="ml-3">
                             <Button className="button-secondary flex items-center">
-                                <IoFilterOutline  className="mr-4"/>
+                                <IoFilterOutline className="mr-4" />
                                 Filter
                             </Button>
                         </div>
                         <div className="ml-3">
                             <Button className="button-secondary flex items-center">
-                                <TbFileExport  className="mr-4"/>
+                                <TbFileExport className="mr-4" />
                                 Export
                             </Button>
                         </div>
                         <div className="ml-3">
-                            <Button onClick={handleAdd} className="button-primary flex items-center">
-                                <IoIosAddCircleOutline  className="mr-4"/>
+                            <Button
+                                onClick={handleAdd}
+                                className="button-primary flex items-center"
+                            >
+                                <IoIosAddCircleOutline className="mr-4" />
                                 Add Product
                             </Button>
                         </div>
@@ -165,26 +223,45 @@ const ProductsPanel = () => {
                         <h1 className="text-2xl font-bold mb-1 ">
                             Music Products Admin Panel
                         </h1>
-                        <p className="text-gray-500">Manage your products and update their stocks</p>
+                        <p className="text-gray-500">
+                            Manage your products and update their stocks
+                        </p>
                     </div>
                     <div className="w-full mt-10">
                         <div>
                             <div className="font-bold flex justify-between">
-                                <span className="w-1/4  p-2">Name</span>
-                                <span className="w-1/4  p-2">Price</span>
-                                <span className="w-1/4  p-2">Stock</span>
-                                <span className="w-1/4  p-2 text-right">Actions</span>
+                                <span className="w-1/5  p-2">Name</span>
+                                <span className="w-1/5  p-2">Description</span>
+                                <span className="w-1/5  p-2">Price</span>
+                                <span className="w-1/5  p-2">Stock</span>
+                                <span className="w-1/5  p-2">Category</span>
+                                <span className="w-1/5  p-2 text-right">
+                                    Actions
+                                </span>
                             </div>
                         </div>
                         <div className="w-full  mt-4">
                             {products.map((product) => (
-                                <div className="flex border-t justify-between" key={product.id}>
-                                    <span className=" w-1/4 block p-2">{product.name}</span>
-                                    <span className=" w-1/4 block p-2">
-                                        ${product.price.toFixed(2)}
+                                <div
+                                    className="flex border-t justify-between"
+                                    key={product._id}
+                                >
+                                    <span className=" w-1/5 block p-2">
+                                        {product.name}
                                     </span>
-                                    <span className=" w-1/4 block p-2">{product.stock}</span>
-                                    <span className=" flex items-center justify-end w-1/4 block p-2">
+                                    <span className=" w-1/5 block p-2">
+                                        {product.Mdescription}
+                                    </span>
+                                    <span className=" w-1/5 block p-2">
+                                        ${product.Mprice}
+                                    </span>
+                                    <span className=" w-1/5 block p-2">
+                                        {product.stock}
+                                    </span>
+                                    <span className=" w-1/5 block p-2">
+                                        {product.category}
+                                    </span>
+                                    <span className=" flex items-center justify-end w-1/5 block p-2">
                                         <Button
                                             onClick={() => handleEdit(product)}
                                             className="button-secondary"
@@ -192,7 +269,9 @@ const ProductsPanel = () => {
                                             Edit
                                         </Button>
                                         <Button
-                                            onClick={() => handleDelete(product.id)}
+                                            onClick={() =>
+                                                handleDelete(product._id)
+                                            }
                                             className="button-primary ml-3"
                                         >
                                             Delete
@@ -222,13 +301,24 @@ const ProductsPanel = () => {
                     />
                 </div>
                 <div className="mb-4">
+                    <label className="block mb-1">description</label>
+                    <Input
+                        type="text"
+                        name="Mdescription"
+                        value={formData.Mdescription}
+                        onChange={handleInputChange}
+                        placeholder="description"
+                    />
+                </div>
+
+                <div className="mb-4">
                     <label className="block mb-1">Price</label>
                     <Input
                         type="number"
-                        name="price"
-                        value={formData.price}
+                        name="Mprice"
+                        value={formData.Mprice}
                         onChange={handleInputChange}
-                        placeholder="Product Price"
+                        placeholder="Price"
                     />
                 </div>
                 <div className="mb-4">
@@ -238,7 +328,27 @@ const ProductsPanel = () => {
                         name="stock"
                         value={formData.stock}
                         onChange={handleInputChange}
-                        placeholder="Product Stock"
+                        placeholder="Stock"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block mb-1">Category</label>
+                    <Input
+                        type="text"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        placeholder="Category"
+                    />
+                </div>
+                <div className="mb-4">
+                    <label className="block mb-1">Image URL</label>
+                    <Input
+                        type="text"
+                        name="imageUrl"
+                        value={formData.imageUrl}
+                        onChange={handleInputChange}
+                        placeholder="Image URL"
                     />
                 </div>
             </Modal>
